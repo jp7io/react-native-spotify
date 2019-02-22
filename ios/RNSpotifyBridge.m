@@ -7,13 +7,24 @@
 //  Copyright © 2015 GergelyOrosz. All rights reserved.
 //
 
-#import "ComponentObjectiveC.h"
+#import "RNSpotifyBridge.h"
 #import <RNSpotify-Swift.h>
 
-@implementation ComponentObjectiveC
+@implementation RNSpotifyBridge
 
 +(NSString*) sayHello: (NSString*) name {
     return [[RNSpotifyHello new] sayHello:@"Swiftception"];
+}
+
++ (BOOL)application:(UIApplication *)app
+            openURL:(NSURL *)url
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
+    [RNSpotify application:app url:url options:options];
+    return true;
+}
+
++(void)applicationDidBecomeActive:(UIApplication *)application {
+    [RNSpotify applicationDidBecomeActive:application];
 }
 
 @end

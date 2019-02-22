@@ -7,9 +7,16 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface RNSpotifyBridge : NSObject
 
 +(NSString*) sayHello: (NSString*) name;
+
++(BOOL)application:(UIApplication *)app
+           openURL:(NSURL *)url
+           options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options;
+
++(void)applicationDidBecomeActive:(UIApplication *)application;
 
 @end
