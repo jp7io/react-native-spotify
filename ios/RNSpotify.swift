@@ -263,6 +263,13 @@ class RNSpotify: RCTEventEmitter,
         }
     }
     
+    @objc(playURI:)
+    func playURI(identifier: NSString) {
+        DispatchQueue.main.async {
+            RNSpotify.spotifyAppRemote!.playerAPI?.play(identifier as String, callback: nil)
+        }
+    }
+    
     @objc(getPlayerState)
     func getPlayerState() {
         self.update(playerState: RNSpotify.spotifyLastPlayerState!)
