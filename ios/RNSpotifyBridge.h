@@ -19,4 +19,6 @@
 
 +(void)applicationDidBecomeActive:(UIApplication *)application;
 
++(void)applicationWillResignActive:(UIApplication *)application;
+
 @end

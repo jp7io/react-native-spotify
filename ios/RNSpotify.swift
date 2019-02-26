@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 @objc(RNSpotify)
-class RNSpotify: NSObject,
+class RNSpotify: RCTEventEmitter,
     SPTSessionManagerDelegate,
     SPTAppRemoteDelegate,
     SPTAppRemotePlayerStateDelegate,
@@ -21,18 +21,18 @@ class RNSpotify: NSObject,
     private static var spotifyAppRemote: SPTAppRemote? = nil
     private static var spotifyAccessToken: String? = nil
     private static var spotifyLastPlayerState: SPTAppRemotePlayerState? = nil
+    private static var spotifyPlayerInfo: NSMutableDictionary? = nil
     
-    private var spotifyRequestedScopes: SPTScope = [.appRemoteControl, .playlistReadPrivate]
+    static private var spotifyRequestedScopes: SPTScope = [.appRemoteControl, .playlistReadPrivate]
     
-    
-    private var spotifyConnectionSuccess: RCTPromiseResolveBlock? = nil
-    private var spotifyConnectionFailure: RCTPromiseRejectBlock? = nil
+    static private var spotifyConnectionSuccess: RCTPromiseResolveBlock? = nil
+    static private var spotifyConnectionFailure: RCTPromiseRejectBlock? = nil
     
     // MARK: - SPTSessionManagerDelegate
     func sessionManager(manager: SPTSessionManager, didFailWith error: Error) {
-        spotifyConnectionFailure!("RNSpotify_Error", "Connection Failure", error)
-        spotifyConnectionFailure = nil
-        spotifyConnectionSuccess = nil
+        RNSpotify.spotifyConnectionFailure!("RNSpotify_Error", "Connection Failure", error)
+        RNSpotify.spotifyConnectionFailure = nil
+        RNSpotify.spotifyConnectionSuccess = nil
     }
     
     func sessionManager(manager: SPTSessionManager, didRenew session: SPTSession) {
@@ -40,15 +40,55 @@ class RNSpotify: NSObject,
     }
     
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
-        spotifyConnectionSuccess!(["Connection Success"])
         RNSpotify.spotifyAppRemote!.connectionParameters.accessToken = session.accessToken
         DispatchQueue.main.async {
             RNSpotify.spotifyAppRemote!.connect()
         }
         RNSpotify.spotifyAccessToken = session.accessToken
-        spotifyConnectionFailure = nil
-        spotifyConnectionSuccess = nil
     }
+    
+    // MARK: - SPTAppRemoteDelegate
+    func appRemoteDidEstablishConnection(_ appRemote: SPTAppRemote) {
+        RNSpotify.spotifyAppRemote!.playerAPI?.delegate = self
+        RNSpotify.spotifyAppRemote!.playerAPI?.subscribe(toPlayerState: {(success, error) in
+            if let error = error {
+                RNSpotify.spotifyConnectionFailure!("RNSpotify_Error", "Error subscribing to player state", error)
+            }
+            if success != nil {
+                self.fecthPlayerState()
+            }
+        })
+    }
+    
+    func appRemote(_ appRemote: SPTAppRemote, didDisconnectWithError error: Error?) {
+        NSLog("APP_REMOTE didDisconnectWithError subscribing to player state:")
+        RNSpotify.spotifyLastPlayerState = nil
+        RNSpotify.spotifyPlayerInfo = nil
+    }
+    
+    func appRemote(_ appRemote: SPTAppRemote, didFailConnectionAttemptWithError error: Error?) {
+        NSLog("APP_REMOTE didFailConnectionAttemptWithError subscribing to player state:")
+        RNSpotify.spotifyLastPlayerState = nil
+        RNSpotify.spotifyPlayerInfo = nil
+    }
+    
+    // MARK: - SPTAppRemoteUserAPIDelegate
+    func userAPI(_ userAPI: SPTAppRemoteUserAPI, didReceive capabilities: SPTAppRemoteUserCapabilities) {
+    }
+    
+    // MARK: - SPTAppRemotePlayerAPIDelegate
+    func playerStateDidChange(_ playerState: SPTAppRemotePlayerState) {
+        update(playerState: playerState)
+    }
+    
+    // MARK: - RCTEventEmitter
+    override func supportedEvents() -> [String]! {
+        return [
+            "PlaybackStateChanged"
+        ]
+    }
+    
+    // MARK: - Bridge Functions
     
     @objc(application:url:options:)
     static func application(application: UIApplication, url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) {
@@ -61,55 +101,46 @@ class RNSpotify: NSObject,
         }
     }
     
-    // MARK: - SPTAppRemoteDelegate
-    func appRemoteDidEstablishConnection(_ appRemote: SPTAppRemote) {
-        NSLog("APP_REMOTE appRemoteDidEstablishConnection")
-        RNSpotify.spotifyAppRemote!.playerAPI?.delegate = self
-        RNSpotify.spotifyAppRemote!.playerAPI?.subscribe(toPlayerState: {(success, error) in
-            if let error = error {
-                NSLog("APP_REMOTE Error subscribing to player state:" + error.localizedDescription)
-            }
-            if success != nil {
-                NSLog("APP_REMOTE Connected")
-            }
-        })
-    }
-    
-    func appRemote(_ appRemote: SPTAppRemote, didDisconnectWithError error: Error?) {
-        NSLog("APP_REMOTE didDisconnectWithError subscribing to player state:")
-        //        updateViewBasedOnConnected()
-        //        lastPlayerState = nil
-    }
-    
-    func appRemote(_ appRemote: SPTAppRemote, didFailConnectionAttemptWithError error: Error?) {
-        NSLog("APP_REMOTE didFailConnectionAttemptWithError subscribing to player state:")
-        //        updateViewBasedOnConnected()
-        //        lastPlayerState = nil
-    }
-    
-    // MARK: - SPTAppRemoteUserAPIDelegate
-    func userAPI(_ userAPI: SPTAppRemoteUserAPI, didReceive capabilities: SPTAppRemoteUserCapabilities) {
-        //
-    }
-    
-    // MARK: - SPTAppRemotePlayerAPIDelegate
-    func playerStateDidChange(_ playerState: SPTAppRemotePlayerState) {
-        update(playerState: playerState)
+    @objc(applicationWillResignActive:)
+    static func applicationWillResignActive(application: UIApplication) {
+        if let _ = RNSpotify.spotifyAppRemote?.isConnected {
+            RNSpotify.spotifyAppRemote!.disconnect()
+        }
     }
     
     // MARK: - Helpers
-    func fetchPlayerState() {
-        RNSpotify.spotifyAppRemote!.playerAPI?.getPlayerState({ [weak self] (playerState, error) in
+    func fecthPlayerState() {
+        RNSpotify.spotifyAppRemote!.playerAPI?.getPlayerState({(playerState, error) in
             if let error = error {
-                //                print("Error getting player state:" + error.localizedDescription)
+                RNSpotify.spotifyConnectionFailure!("RNSpotify_Error", "Error reading player state", error)
             } else if let playerState = playerState as? SPTAppRemotePlayerState {
-                self?.update(playerState: playerState)
+                self.update(playerState: playerState)
+                if (RNSpotify.spotifyConnectionSuccess != nil) {
+                    RNSpotify.spotifyConnectionSuccess!(["Connection Success"])
+                    RNSpotify.spotifyConnectionFailure = nil
+                    RNSpotify.spotifyConnectionSuccess = nil
+                }
             }
         })
     }
     
     func update(playerState: SPTAppRemotePlayerState) {
         RNSpotify.spotifyLastPlayerState = playerState
+        let trackImageSplit = playerState.track.imageIdentifier.components(separatedBy: ":")
+        let trackImageID: String = trackImageSplit[2]
+        RNSpotify.spotifyPlayerInfo = [
+            "trackInfo" : [
+                "name": playerState.track.name,
+                "album": playerState.track.album.name,
+                "artist": playerState.track.artist.name,
+                "coverArt": "https://i.scdn.co/image/" + trackImageID
+            ],
+            "paused": playerState.isPaused,
+            "next": playerState.playbackRestrictions.canSkipNext,
+            "previous": playerState.playbackRestrictions.canSkipPrevious,
+            "accessToken": RNSpotify.spotifyAccessToken as Any
+        ]
+        self.sendEvent(withName: "PlaybackStateChanged", body: RNSpotify.spotifyPlayerInfo)
     }
     
     // MARK : - Export Functions
@@ -187,14 +218,14 @@ class RNSpotify: NSObject,
     
     @objc (connect:reject:)
     func connect(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
-        spotifyConnectionSuccess = resolve
-        spotifyConnectionFailure = reject
+        RNSpotify.spotifyConnectionSuccess = resolve
+        RNSpotify.spotifyConnectionFailure = reject
         if #available(iOS 11, *) {
             // Use this on iOS 11 and above to take advantage of SFAuthenticationSession
-            RNSpotify.spotifySessionManager!.initiateSession(with: spotifyRequestedScopes, options: .clientOnly)
+            RNSpotify.spotifySessionManager!.initiateSession(with: RNSpotify.spotifyRequestedScopes, options: .clientOnly)
         } else {
             // Use this on iOS versions < 11 to use SFSafariViewController
-            RNSpotify.spotifySessionManager!.initiateSession(with: spotifyRequestedScopes, options: .clientOnly, presenting: (UIViewController()))
+            RNSpotify.spotifySessionManager!.initiateSession(with: RNSpotify.spotifyRequestedScopes, options: .clientOnly, presenting: (UIViewController()))
         }
     }
     
@@ -206,8 +237,8 @@ class RNSpotify: NSObject,
     }
     
     @objc(setPlayState:)
-    func setPlayState(play: Bool) {
-        if play {
+    func setPlayState(play: ObjCBool) {
+        if play.boolValue {
             DispatchQueue.main.async {
                 RNSpotify.spotifyAppRemote!.playerAPI?.pause(nil)
             }
@@ -232,4 +263,8 @@ class RNSpotify: NSObject,
         }
     }
     
+    @objc(getPlayerState)
+    func getPlayerState() {
+        self.update(playerState: RNSpotify.spotifyLastPlayerState!)
+    }
 }
