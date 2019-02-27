@@ -257,7 +257,7 @@ class RNSpotify: RCTEventEmitter,
     }
     
     @objc(previousSong)
-    func didTapSkipPrev() {
+    func previousSong() {
         DispatchQueue.main.async {
             RNSpotify.spotifyAppRemote!.playerAPI?.skip(toPrevious: nil)
         }
@@ -270,8 +270,20 @@ class RNSpotify: RCTEventEmitter,
         }
     }
     
-    @objc(getPlayerState)
-    func getPlayerState() {
-        self.update(playerState: RNSpotify.spotifyLastPlayerState!)
+    @objc(updatePlayerState)
+    func updatePlayerState() {
+        if (RNSpotify.spotifyLastPlayerState != nil) {
+            self.update(playerState: RNSpotify.spotifyLastPlayerState!)
+        }
+    }
+    
+    @objc(isInitializedAsync:reject:)
+    func isInitializedAsync(resolve: RCTPromiseResolveBlock, _: RCTPromiseRejectBlock) {
+        resolve(RNSpotify.spotifySessionManager != nil)
+    }
+    
+    @objc(isLoggedInAsync:reject:)
+    func isLoggedInAsync(resolve: RCTPromiseResolveBlock, _: RCTPromiseRejectBlock) {
+        resolve(RNSpotify.spotifyAppRemote?.isConnected)
     }
 }
