@@ -40,11 +40,11 @@ class RNSpotify: RCTEventEmitter,
     }
     
     func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
-        RNSpotify.spotifyAppRemote!.connectionParameters.accessToken = session.accessToken
-        DispatchQueue.main.async {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5){
+            RNSpotify.spotifyAppRemote!.connectionParameters.accessToken = session.accessToken
+            RNSpotify.spotifyAccessToken = session.accessToken
             RNSpotify.spotifyAppRemote!.connect()
         }
-        RNSpotify.spotifyAccessToken = session.accessToken
     }
     
     // MARK: - SPTAppRemoteDelegate
