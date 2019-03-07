@@ -146,7 +146,9 @@ Spotify.subscribe(callback)
   trackInfo: {
 	 name: String - current song name,
 	 album: String - current song album,
+	 albumURI: String - current song album URI,
 	 artist: String - current song artist,
+	 artistURI: String - current song artist URI,
 	 coverArt: String - current song cover art,
 	},
 	paused: Bool - is player currently paused?,
