@@ -109,10 +109,10 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
       String tokenRefreshURL = config.getString("tokenRefreshURL");
       String playURI = config.getString("playURI");
 
-      if (clientID.length() > 0) {
+      if (clientID.length() == 0) {
         throw new InvalidParameterException("Invalid or missing configuration: clientID");
       }
-      if (redirectURI.length() > 0) {
+      if (redirectURI.length() == 0) {
         throw new InvalidParameterException("Invalid or missing configuration: redirectURI");
       }
       if (playURI.length() > 0) {
