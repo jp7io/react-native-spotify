@@ -1,6 +1,8 @@
 
 # react-native-spotify
 
+React Native module that exposes Spotify's iOS and Android SDKs to Javascript
+
 ## Getting started
 
 `$ yarn add react-native-spotify https://github.com/jp7internet/react-native-spotify.git`
