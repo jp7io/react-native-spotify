@@ -20,6 +20,18 @@ dependencies {
   ...
 ```
 
+Also on android/app/build.gradle activate support for Java 8:
+
+```
+android {
+    ...
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+...
+```
+
 On android/settings.gradle add:
 
 ```
