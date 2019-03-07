@@ -118,7 +118,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
       if (playURI.length() > 0) {
         configPlayURI = playURI;
       }
-
+      // tokenSwapURL and tokenRefreshURL are not used right now
+      // they are part of the iOS config, but the Android docs say nothing about them
 
       builder = new AuthenticationRequest.Builder(clientID, AuthenticationResponse.Type.TOKEN, redirectURI);
       connectionParams = new ConnectionParams.Builder(clientID)
