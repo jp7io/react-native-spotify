@@ -7,10 +7,30 @@ React Native module that exposes Spotify's iOS and Android SDKs to Javascript
 
 `$ yarn add react-native-spotify https://github.com/jp7internet/react-native-spotify.git`
 
-### Installation
+## Installation
 `$ react-native link react-native-spotify`
 
-### On iOS
+### For Android
+
+On android/app/build.gradle make sure it's **implementation** and not **compile**:
+
+```
+dependencies {
+  implementation project(':react-native-spotify')
+  ...
+```
+
+On android/settings.gradle add:
+
+```
+include ':spotify-app-remote'
+project(':spotify-app-remote').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-spotify/android/spotify-app-remote')
+include ':spotify-auth'
+project(':spotify-auth').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-spotify/android/spotify-auth')
+```
+
+
+### For iOS
 Add to AppDelegate.m
 
 ```
