@@ -32,7 +32,24 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
 
   private SpotifyAppRemote mSpotifyAppRemote;
 
+  private boolean isPaused = false;
+
   AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+  Connector.ConnectionListener connectionListener = new Connector.ConnectionListener() {
+    @Override
+    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
+      mSpotifyAppRemote = spotifyAppRemote;
+      Log.d("MainActivity/lib", "Connected! Yay!");
+
+      mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
+    }
+
+    @Override
+    public void onFailure(Throwable throwable) {
+      Log.e("MainActivity/lib", throwable.getMessage(), throwable);
+
+    }
+  };
 
   private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
     @Override
@@ -45,21 +62,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
             ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
                     .setRedirectUri(REDIRECT_URI)
                     .build();
-            SpotifyAppRemote.connect(reactContext, connectionParams, new Connector.ConnectionListener() {
-              @Override
-              public void onConnected(SpotifyAppRemote spotifyAppRemote) {
-                mSpotifyAppRemote = spotifyAppRemote;
-                Log.d("MainActivity/lib", "Connected! Yay!");
-
-                mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
-              }
-
-              @Override
-              public void onFailure(Throwable throwable) {
-                Log.e("MainActivity/lib", throwable.getMessage(), throwable);
-
-              }
-            });
+            SpotifyAppRemote.connect(reactContext, connectionParams, connectionListener);
             break;
           // Auth flow returned an error
           case ERROR:
@@ -92,5 +95,16 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
     builder.setScopes(new String[]{"streaming"});
     AuthenticationRequest request = builder.build();
     AuthenticationClient.openLoginActivity(getCurrentActivity(), REQUEST_CODE, request);
+  }
+
+  @ReactMethod
+  public void setPlayState(boolean state) {
+    if (this.isPaused) {
+      mSpotifyAppRemote.getPlayerApi().resume();
+      this.isPaused = false;
+    } else {
+      mSpotifyAppRemote.getPlayerApi().pause();
+      this.isPaused = true;
+    }
   }
 }
