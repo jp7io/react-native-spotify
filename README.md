@@ -88,7 +88,8 @@ Add to Info.plist
 
 Add to the Project Configs
 
-- Linked Frameworks and Libraries
+- General -> Linked Frameworks and Libraries
+	- Click the plus sign (+), then click "Add Other..."
 	- add ../node_modules/react-native-spotify/ios/Frameworks/SpotifyiOS.framework
 - Build Settings
 	- Framework Search Path
