@@ -189,7 +189,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void isLoggedInAsync(Promise promise) {
-    promise.resolve(mSpotifyAppRemote.isConnected());
+    promise.resolve(mSpotifyAppRemote != null && mSpotifyAppRemote.isConnected());
   }
 
   public void update(PlayerState playerState) {
