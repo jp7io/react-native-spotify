@@ -144,17 +144,19 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void disconnect() {
-    if (mSpotifyAppRemote.isConnected()) {
+    if (mSpotifyAppRemote != null && mSpotifyAppRemote.isConnected()) {
       SpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
   }
 
   @ReactMethod
   public void setPlayState(boolean state) {
-    if (state) {
-      mSpotifyAppRemote.getPlayerApi().resume();
-    } else {
-      mSpotifyAppRemote.getPlayerApi().pause();
+    if (mSpotifyAppRemote != null) {
+      if (state) {
+        mSpotifyAppRemote.getPlayerApi().resume();
+      } else {
+        mSpotifyAppRemote.getPlayerApi().pause();
+      }
     }
   }
 
