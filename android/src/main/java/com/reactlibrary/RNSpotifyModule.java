@@ -39,6 +39,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
   private String configPlayURI;
   private String spotifyAccessToken;
   private PlayerState spotifyLastPlayerState;
+  private Promise spotifyConnectPromise;
 
   Connector.ConnectionListener connectionListener = new Connector.ConnectionListener() {
     @Override
@@ -55,12 +56,20 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
           spotifyLastPlayerState = playerState;
           update(playerState);
         });
+
+      if (spotifyConnectPromise != null) {
+        spotifyConnectPromise.resolve("Connection Success");
+        spotifyConnectPromise = null;
+      }
     }
 
     @Override
     public void onFailure(Throwable throwable) {
       Log.e("RNSpotifyModule", throwable.getMessage(), throwable);
-
+      if (spotifyConnectPromise != null) {
+        spotifyConnectPromise.reject("RNSpotify_Error", "Problema de Comunicação com Spotify, tente novamente", throwable);
+        spotifyConnectPromise = null;
+      }
     }
   };
 
@@ -136,10 +145,11 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void connect() {
+  public void connect(Promise promise) {
     builder.setScopes(new String[]{"streaming"});
     AuthenticationRequest request = builder.build();
     AuthenticationClient.openLoginActivity(getCurrentActivity(), REQUEST_CODE, request);
+    spotifyConnectPromise = promise;
   }
 
   @ReactMethod
