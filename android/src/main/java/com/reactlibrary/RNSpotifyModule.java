@@ -49,6 +49,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
 
       if (configPlayURI != null) {
         mSpotifyAppRemote.getPlayerApi().play(configPlayURI);
+      } else {
+        mSpotifyAppRemote.getPlayerApi().resume();
       }
       mSpotifyAppRemote.getPlayerApi()
         .subscribeToPlayerState()
@@ -58,8 +60,11 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
         });
 
       if (spotifyConnectPromise != null) {
-        spotifyConnectPromise.resolve("Connection Success");
-        spotifyConnectPromise = null;
+        mSpotifyAppRemote.getPlayerApi().getPlayerState().setResultCallback(playerState -> {
+          update(playerState);
+          spotifyConnectPromise.resolve("Connection Success");
+          spotifyConnectPromise = null;
+        });
       }
     }
 
@@ -82,6 +87,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
         switch (response.getType()) {
           case TOKEN:
             spotifyAccessToken = response.getAccessToken();
+            Log.d("RNSpotifyModule", "spotifyAccessToken: "+spotifyAccessToken);
             SpotifyAppRemote.connect(reactContext, connectionParams, connectionListener);
             break;
           // Auth flow returned an error
@@ -160,12 +166,12 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void setPlayState(boolean state) {
+  public void setPlayState(boolean isPlaying) {
     if (mSpotifyAppRemote != null) {
-      if (state) {
-        mSpotifyAppRemote.getPlayerApi().resume();
-      } else {
+      if (isPlaying) {
         mSpotifyAppRemote.getPlayerApi().pause();
+      } else {
+        mSpotifyAppRemote.getPlayerApi().resume();
       }
     }
   }
@@ -221,6 +227,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
       spotifyPlayerInfo.putBoolean("paused", playerState.isPaused);
       spotifyPlayerInfo.putBoolean("next", playerState.playbackRestrictions.canSkipNext);
       spotifyPlayerInfo.putBoolean("previous", playerState.playbackRestrictions.canSkipPrev);
+      //Log.d("RNSpotifyModule", "update spotifyAccessToken: "+spotifyAccessToken);
       spotifyPlayerInfo.putString("accessToken", spotifyAccessToken);
 
       sendEvent("PlaybackStateChanged", spotifyPlayerInfo);
