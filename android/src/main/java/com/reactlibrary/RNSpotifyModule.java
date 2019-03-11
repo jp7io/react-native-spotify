@@ -62,7 +62,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
       if (spotifyConnectPromise != null) {
         mSpotifyAppRemote.getPlayerApi().getPlayerState().setResultCallback(playerState -> {
           update(playerState);
-          spotifyConnectPromise.resolve("Connection Success");
+          spotifyConnectPromise.resolve(spotifyAccessToken);
           spotifyConnectPromise = null;
         });
       }

@@ -117,7 +117,7 @@ class RNSpotify: RCTEventEmitter,
             } else if let playerState = playerState as? SPTAppRemotePlayerState {
                 self.update(playerState: playerState)
                 if (RNSpotify.spotifyConnectionSuccess != nil) {
-                    RNSpotify.spotifyConnectionSuccess!(["Connection Success"])
+                    RNSpotify.spotifyConnectionSuccess!(RNSpotify.spotifyAccessToken)
                     RNSpotify.spotifyConnectionFailure = nil
                     RNSpotify.spotifyConnectionSuccess = nil
                 }
