@@ -118,7 +118,7 @@ Spotify.initialize({configs})
 Spotify.connect()
 /*
  Connects to Spotify
- Returns: Promise that resolves once a connection is stablished or is rejected if there's an error
+ Returns: Promise that resolves to accessToken once a connection is stablished or is rejected if there's an error
 */
 
 Spotify.disconnect()
