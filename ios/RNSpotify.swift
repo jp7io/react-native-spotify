@@ -235,6 +235,7 @@ class RNSpotify: RCTEventEmitter,
         if (RNSpotify.spotifyAppRemote!.isConnected) {
             RNSpotify.spotifyAppRemote!.disconnect()
         }
+        RNSpotify.spotifySessionManager = nil
     }
     
     @objc(setPlayState:)
