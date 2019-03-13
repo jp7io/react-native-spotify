@@ -136,8 +136,10 @@ class RNSpotify: RCTEventEmitter,
                 "albumURI": playerState.track.album.uri,
                 "artist": playerState.track.artist.name,
                 "artistURI": playerState.track.artist.uri,
-                "coverArt": "https://i.scdn.co/image/" + trackImageID
+                "coverArt": "https://i.scdn.co/image/" + trackImageID,
+                "duration": playerState.track.duration
             ],
+            "playbackPosition": playerState.playbackPosition,
             "paused": playerState.isPaused,
             "next": playerState.playbackRestrictions.canSkipNext,
             "previous": playerState.playbackRestrictions.canSkipPrevious,
