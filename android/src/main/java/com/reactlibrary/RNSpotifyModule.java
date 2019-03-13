@@ -221,9 +221,11 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
       trackInfo.putString("artist", track.artist.name);
       trackInfo.putString("artistURI", track.artist.uri);
       trackInfo.putString("coverArt", "https://i.scdn.co/image/" + trackImageSplit[2]);
+      trackInfo.putDouble("duration", track.duration);
 
       WritableMap spotifyPlayerInfo = Arguments.createMap();
       spotifyPlayerInfo.putMap("trackInfo", trackInfo);
+      spotifyPlayerInfo.putDouble("playbackPosition", playerState.playbackPosition);
       spotifyPlayerInfo.putBoolean("paused", playerState.isPaused);
       spotifyPlayerInfo.putBoolean("next", playerState.playbackRestrictions.canSkipNext);
       spotifyPlayerInfo.putBoolean("previous", playerState.playbackRestrictions.canSkipPrev);
