@@ -280,9 +280,7 @@ class RNSpotify: RCTEventEmitter,
     
     @objc(updatePlayerState)
     func updatePlayerState() {
-        if let _ = RNSpotify.spotifyAppRemote?.isConnected {
-            // nothing
-        } else {
+        if !(RNSpotify.spotifyAppRemote?.isConnected ?? false) {
             RNSpotify.spotifyAppRemote!.connect()
         }
         self.fecthPlayerState();

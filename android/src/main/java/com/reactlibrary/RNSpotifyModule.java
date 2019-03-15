@@ -38,7 +38,6 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
   private ConnectionParams connectionParams;
   private String configPlayURI;
   private String spotifyAccessToken;
-  private PlayerState spotifyLastPlayerState;
   private Promise spotifyConnectPromise;
 
   Connector.ConnectionListener connectionListener = new Connector.ConnectionListener() {
@@ -55,7 +54,6 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
       mSpotifyAppRemote.getPlayerApi()
         .subscribeToPlayerState()
         .setEventCallback(playerState -> {
-          spotifyLastPlayerState = playerState;
           update(playerState);
         });
 
@@ -193,9 +191,9 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void updatePlayerState() {
-    if (spotifyLastPlayerState != null) {
-      update(spotifyLastPlayerState);
-    }
+    mSpotifyAppRemote.getPlayerApi().getPlayerState().setResultCallback(playerState -> {
+      update(playerState);
+    });
   }
 
   @ReactMethod
