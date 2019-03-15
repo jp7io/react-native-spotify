@@ -283,7 +283,9 @@ class RNSpotify: RCTEventEmitter,
         if !(RNSpotify.spotifyAppRemote?.isConnected ?? false) {
             RNSpotify.spotifyAppRemote!.connect()
         }
-        self.fecthPlayerState();
+        DispatchQueue.main.async {
+            self.fecthPlayerState();
+        }
     }
     
     @objc(isInitializedAsync:reject:)
