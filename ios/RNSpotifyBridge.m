@@ -31,4 +31,8 @@
     [RNSpotify applicationWillResignActive:application];
 }
 
++(void) applicationWillTerminate:(UIApplication *)application {
+    [RNSpotify applicationWillTerminate:application];
+}
+
 @end

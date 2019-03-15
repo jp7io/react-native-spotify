@@ -63,12 +63,10 @@ class RNSpotify: RCTEventEmitter,
     }
     
     func appRemote(_ appRemote: SPTAppRemote, didDisconnectWithError error: Error?) {
-        RNSpotify.spotifyLastPlayerState = nil
         RNSpotify.spotifyPlayerInfo = nil
     }
     
     func appRemote(_ appRemote: SPTAppRemote, didFailConnectionAttemptWithError error: Error?) {
-        RNSpotify.spotifyLastPlayerState = nil
         RNSpotify.spotifyPlayerInfo = nil
     }
     
@@ -104,6 +102,11 @@ class RNSpotify: RCTEventEmitter,
     
     @objc(applicationWillResignActive:)
     static func applicationWillResignActive(application: UIApplication) {
+        //
+    }
+    
+    @objc(applicationWillTerminate:)
+    static func applicationWillTerminate(application: UIApplication) {
         if let _ = RNSpotify.spotifyAppRemote?.isConnected {
             RNSpotify.spotifyAppRemote!.disconnect()
         }
@@ -126,7 +129,6 @@ class RNSpotify: RCTEventEmitter,
     }
     
     func update(playerState: SPTAppRemotePlayerState) {
-        RNSpotify.spotifyLastPlayerState = playerState
         let trackImageSplit = playerState.track.imageIdentifier.components(separatedBy: ":")
         let trackImageID: String = trackImageSplit[2]
         RNSpotify.spotifyPlayerInfo = [
@@ -278,9 +280,12 @@ class RNSpotify: RCTEventEmitter,
     
     @objc(updatePlayerState)
     func updatePlayerState() {
-        if (RNSpotify.spotifyLastPlayerState != nil) {
-            self.update(playerState: RNSpotify.spotifyLastPlayerState!)
+        if let _ = RNSpotify.spotifyAppRemote?.isConnected {
+            // nothing
+        } else {
+            RNSpotify.spotifyAppRemote!.connect()
         }
+        self.fecthPlayerState();
     }
     
     @objc(isInitializedAsync:reject:)

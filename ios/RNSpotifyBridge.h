@@ -21,4 +21,6 @@
 
 +(void)applicationWillResignActive:(UIApplication *)application;
 
++(void)applicationWillTerminate:(UIApplication *)application;
+
 @end
