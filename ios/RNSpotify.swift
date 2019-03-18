@@ -17,6 +17,7 @@ class RNSpotify: RCTEventEmitter,
     SPTAppRemoteUserAPIDelegate
 {
     
+    private static var parentApplication: UIApplication? = nil;
     private static var spotifySessionManager: SPTSessionManager? = nil
     private static var spotifyAppRemote: SPTAppRemote? = nil
     private static var spotifyAccessToken: String? = nil
@@ -98,6 +99,7 @@ class RNSpotify: RCTEventEmitter,
         if let _ = RNSpotify.spotifyAppRemote?.connectionParameters.accessToken {
             RNSpotify.spotifyAppRemote!.connect()
         }
+        RNSpotify.parentApplication = application;
     }
     
     @objc(applicationWillResignActive:)
@@ -296,5 +298,27 @@ class RNSpotify: RCTEventEmitter,
     @objc(isLoggedInAsync:reject:)
     func isLoggedInAsync(resolve: RCTPromiseResolveBlock, _: RCTPromiseRejectBlock) {
         resolve(RNSpotify.spotifyAppRemote?.isConnected)
+    }
+    
+    @objc(openInstallUrl:)
+    func openInstallUrl(packageName: NSString) {
+        let adjustUrl = "https://app.adjust.com/bdyga9?campaign="+(packageName as String);
+        
+        let request = NSMutableURLRequest();
+        request.url = URL(string: adjustUrl);
+        request.setValue("spotify_campaign_user_agent", forHTTPHeaderField: "User-Agent");
+
+        let task = URLSession.shared.dataTask(with: request as URLRequest) { (data, response, error) in
+            if let error = error {
+                print("RNSpotify/NSURLConnection error: \(error)");
+                return;
+            }
+            print("RNSpotify/NSURLConnection OK: \(response.debugDescription)");
+            DispatchQueue.main.async {
+                let appUrl = URL(string: "https://itunes.apple.com/app/spotify-music/id324684580?mt=8");
+                RNSpotify.parentApplication!.openURL(appUrl!);
+            }
+        }
+        task.resume();
     }
 }
