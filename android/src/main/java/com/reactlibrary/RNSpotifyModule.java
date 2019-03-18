@@ -3,6 +3,7 @@ package com.reactlibrary;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import com.facebook.react.bridge.ActivityEventListener;
@@ -176,24 +177,32 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void nextSong() {
-    mSpotifyAppRemote.getPlayerApi().skipNext();
+    if (mSpotifyAppRemote != null) {
+      mSpotifyAppRemote.getPlayerApi().skipNext();
+    }
   }
 
   @ReactMethod
   public void previousSong() {
-    mSpotifyAppRemote.getPlayerApi().skipPrevious();
+    if (mSpotifyAppRemote != null) {
+      mSpotifyAppRemote.getPlayerApi().skipPrevious();
+    }
   }
 
   @ReactMethod
   public void playURI(String spotifyURI) {
-    mSpotifyAppRemote.getPlayerApi().play(spotifyURI);
+    if (mSpotifyAppRemote != null) {
+      mSpotifyAppRemote.getPlayerApi().play(spotifyURI);
+    }
   }
 
   @ReactMethod
   public void updatePlayerState() {
-    mSpotifyAppRemote.getPlayerApi().getPlayerState().setResultCallback(playerState -> {
-      update(playerState);
-    });
+    if (mSpotifyAppRemote != null) {
+      mSpotifyAppRemote.getPlayerApi().getPlayerState().setResultCallback(playerState -> {
+        update(playerState);
+      });
+    }
   }
 
   @ReactMethod
@@ -238,5 +247,27 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
   public void sendEvent(String eventName, Object data) {
     reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
             .emit(eventName, data);
+  }
+
+  @ReactMethod
+  public void openInstallUrl(String packageName) {
+    final String appPackageName = "com.spotify.music";
+    final String referrer = "adjust_campaign="+packageName+"&adjust_tracker=ndjczk&utm_source=adjust_preinstall";
+
+    try {
+      Uri uri = Uri.parse("market://details")
+              .buildUpon()
+              .appendQueryParameter("id", appPackageName)
+              .appendQueryParameter("referrer", referrer)
+              .build();
+      reactContext.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+    } catch (android.content.ActivityNotFoundException ignored) {
+      Uri uri = Uri.parse("https://play.google.com/store/apps/details")
+              .buildUpon()
+              .appendQueryParameter("id", appPackageName)
+              .appendQueryParameter("referrer", referrer)
+              .build();
+      reactContext.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+    }
   }
 }
