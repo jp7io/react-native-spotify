@@ -12,5 +12,6 @@ RCT_EXTERN_METHOD(playURI:(NSString)identifier)
 RCT_EXTERN_METHOD(updatePlayerState)
 RCT_EXTERN_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(isLoggedInAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(openInstallUrl:(NSString)packageName)
 
 @end
