@@ -64,6 +64,11 @@ Add to AppDelegate.m
   {
     return [RNSpotifyBridge applicationWillResignActive:application];
   }
+  
+  - (void)applicationWillTerminate:(UIApplication *)application
+  {
+    return [RNSpotifyBridge applicationWillTerminate:application];
+  }
 ```
 
 Add to Info.plist
@@ -208,5 +213,11 @@ RNSpotify.webApiGet(endpoint, params)
 	params: Object - The params to be passed to the request
 */
 
-
+RNSpotify.openInstallUrl(packageName)
+/*
+ Opens Spotify install page on the App/Play Store, and tracks the request.
+ Returns: void
+ Params:
+ 	packageName: String - The package name for tracking
+*/
 ```
