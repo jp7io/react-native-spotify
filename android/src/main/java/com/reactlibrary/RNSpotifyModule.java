@@ -260,14 +260,18 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule {
               .appendQueryParameter("id", appPackageName)
               .appendQueryParameter("referrer", referrer)
               .build();
-      reactContext.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+      Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      reactContext.startActivity(intent);
     } catch (android.content.ActivityNotFoundException ignored) {
       Uri uri = Uri.parse("https://play.google.com/store/apps/details")
               .buildUpon()
               .appendQueryParameter("id", appPackageName)
               .appendQueryParameter("referrer", referrer)
               .build();
-      reactContext.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+      Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      reactContext.startActivity(intent);
     }
   }
 }
