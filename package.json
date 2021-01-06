@@ -16,6 +16,6 @@
     "react-native-windows": "0.41.0-rc.1"
   },
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.21.1"
   }
 }
