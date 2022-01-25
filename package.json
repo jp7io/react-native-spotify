@@ -1,7 +1,7 @@
 {
   "name": "react-native-spotify",
   "version": "1.0.0",
-  "description": "",
+  "description": "React Native module that exposes Spotify's iOS and Android SDKs to Javascript",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,7 +9,7 @@
   "keywords": [
     "react-native"
   ],
-  "author": "",
+  "author": "JP7",
   "license": "",
   "peerDependencies": {
     "react-native": "^0.41.2",
